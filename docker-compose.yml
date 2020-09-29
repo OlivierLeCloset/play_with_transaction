@@ -1,0 +1,30 @@
+version: "3.5"
+
+x-base: &base
+  extra_hosts:
+    - "docker.bridge:${DOCKER_BRIDGE}"
+
+services:
+  db:
+    image: postgres:12.3
+    container_name: pwt_postgres
+    volumes:
+      - ./tmp/db:/var/lib/postgresql/data
+  web:
+    <<: *base
+    tty: true
+    stdin_open: true
+    build: .
+    command: bash -c "echo 'START'"
+    container_name: pwt_web
+    volumes:
+      - .:/app:cached
+      - gems:/gems:delegated
+    links:
+      - db
+    ports:
+      - "3003:3003"
+    depends_on:
+      - db
+volumes:
+  gems:
